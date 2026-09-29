@@ -1,0 +1,48 @@
+name: Validate notebooks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install nbformat nbclient ipykernel numpy pandas
+      - name: Check every notebook is valid nbformat
+        run: |
+          python - <<'EOF'
+          import pathlib, nbformat
+          bad = 0
+          for p in sorted(pathlib.Path(".").rglob("*.ipynb")):
+              try:
+                  nbformat.validate(nbformat.read(p, as_version=4))
+              except Exception as e:
+                  bad += 1
+                  print("INVALID", p, e)
+          print("notebooks checked; invalid:", bad)
+          raise SystemExit(bad)
+          EOF
+      - name: Execute the solution notebooks (all tests must pass)
+        run: |
+          python - <<'EOF'
+          import pathlib, nbformat
+          from nbclient import NotebookClient
+          failed = 0
+          for p in sorted(pathlib.Path("solutions").glob("*.ipynb")):
+              nb = nbformat.read(p, as_version=4)
+              NotebookClient(nb, timeout=600, kernel_name="python3").execute()
+              text = "".join(o.get("text", "") for c in nb.cells if c.cell_type == "code" for o in c.outputs)
+              if "FAIL" in text:
+                  failed += 1
+                  print("FAILING CHECKS in", p)
+              else:
+                  print("ok", p)
+          raise SystemExit(failed)
+          EOF
