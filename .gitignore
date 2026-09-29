@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Files the notebooks create when you run them
+notes/*.txt
+notes/*.csv
+notes/*.json
+notes/*.bin
+notes/*.pkl
+notes/*.zip
+notes/*.gz
+notes/mytools.py
+notes/cpu_work.py
+notes/shapes/
+exam_prep/*.txt
+exam_prep/*.csv
+exam_prep/*.json
+projects/*.json
+projects/*.db
+
+# Editors / OS
+.vscode/
+.idea/
+.kilo/
+.DS_Store
+Thumbs.db
